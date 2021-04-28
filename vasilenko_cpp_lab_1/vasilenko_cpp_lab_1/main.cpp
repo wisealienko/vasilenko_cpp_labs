@@ -6,6 +6,7 @@
 //
 
 #include <iostream>
+#include <cmath>
 using namespace std;
 
 double get_number();
