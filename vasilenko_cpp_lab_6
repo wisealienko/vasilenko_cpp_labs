@@ -1,0 +1,126 @@
+//
+//  main.cpp
+//  vasilenko_cpp_lab_6
+//
+//  Created by Evgeny Wisealienko on 02.05.2021.
+//
+
+#include <iostream>
+#include <cstdlib>
+#define branches_count 4
+using namespace std;
+
+struct node
+{
+    node* branche[branches_count];
+    int data;
+};
+
+int get_tiers_count();
+int get_integer_number();
+void build_tree(node*& tree, const int tiers_count, int current_tire = 0);
+void delete_tree(node*& tree);
+void print_tree(node*& tree, const int tiers_count, int current_tire = 1);
+
+int main()
+{
+    setlocale(LC_ALL, "rus");
+
+    cout << "Сколько ярусов должно быть у дерева?\n";
+    cout << "Ваш ответ: ";
+    const int tiers_count = get_tiers_count();
+    
+    node* tree = NULL;
+    build_tree(tree, tiers_count);
+
+    print_tree(tree, tiers_count);
+
+    delete_tree(tree);
+
+    return 0;
+}
+
+int get_tiers_count()
+{
+    int result = 0;
+    bool number_is_not_natural = 0;
+    do {
+        result = get_integer_number();
+        number_is_not_natural = (result < 1);
+        if (number_is_not_natural) {
+            cout << "Ошибка: число не натуральное\n";
+            cout << "Введите данные снова: ";
+        }
+    } while (number_is_not_natural);
+    return result;
+}
+
+int get_integer_number()
+{
+    while (true)
+    {
+        int number;
+        cin >> number;
+        if (cin.fail())
+        {
+            cout << "Ошибка: вы ввели не число\n";
+            cout << "Введите данные снова: ";
+            cin.clear();
+            cin.ignore(32767, '\n');
+        }
+        else {
+            cin.ignore(32767, '\n');
+            return number;
+        }
+    }
+}
+
+void build_tree(node*& tree, const int tiers_count, int current_tire)
+{
+    tree = new node;
+    tree->data = rand() % 10;
+    current_tire += 1;
+    if (current_tire < tiers_count) {
+        for (int i = 0; i < branches_count; i++) {
+            build_tree(tree->branche[i], tiers_count, current_tire);
+        }
+    } else {
+        for (int i = 0; i < branches_count; i++) {
+            tree->branche[i] = NULL;
+        }
+    }
+}
+
+void print_tree(node*& tree, const int tiers_count, int current_tire)
+{
+    if (tree != NULL)
+    {
+        for (int i = 0; i < branches_count / 2; i++) {
+            print_tree(tree->branche[i], tiers_count, current_tire + 1);
+        }
+
+        for (int i = 0; i < current_tire - 1; i++) {
+            cout << "   ";
+        }
+        cout << tree->data << "\n";
+        
+
+        for (int i = branches_count / 2; i < branches_count; i++) {
+            print_tree(tree->branche[i], tiers_count, current_tire + 1);
+            if ((current_tire == tiers_count - 1) && (i == branches_count - 1)) {
+                cout << "\n";
+            }
+        }
+    }
+}
+
+void delete_tree(node*& tree) {
+    if (tree != NULL)
+    {
+        for (int i = 0; i < branches_count; i++) {
+            delete_tree(tree->branche[i]);
+        }
+        delete tree;
+        tree = NULL;
+    }
+}
