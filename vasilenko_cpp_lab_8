@@ -1,0 +1,133 @@
+//
+//  main.cpp
+//  vasilenko_cpp_lab_8
+//
+//  Created by Evgeny Wisealienko on 02.05.2021.
+//
+
+#include <iostream>
+using namespace std;
+
+double GetNumber();
+
+class ComlexNumber {
+public:
+    void Setxy(double Rez, double Imz) {
+        x = Rez;
+        y = Imz;
+    }
+
+    void ShowComlexNumber() {
+        if (x != 0) {
+            if (y != 0) {
+                if (y > 0) {
+                    cout << x << "+" << y << "i\n";
+                }
+                if (y < 0) {
+                    cout << x << y << "i\n";
+                }
+            } else {
+                cout << x << "\n";
+            }
+            
+        } else {
+            if (y == 0) {
+                cout << y << "\n";
+            } else {
+                cout << y << "i" << "\n";
+            }
+        }
+    }
+
+    static void Summa(ComlexNumber Summand1, ComlexNumber Summand2) {
+        ComlexNumber tmp;
+        tmp.x = Summand1.x + Summand2.x;
+        tmp.y = Summand1.y + Summand2.y;
+        cout << "z1+z2=";
+        tmp.ShowComlexNumber();
+    }
+
+    static void Difference(ComlexNumber Reduced, ComlexNumber Subtracted) {
+        ComlexNumber tmp;
+        tmp.x = Reduced.x - Subtracted.x;
+        tmp.y = Reduced.y - Subtracted.y;
+        cout << "z1-z2=";
+        tmp.ShowComlexNumber();
+    }
+
+    static void Multiplication(ComlexNumber Factor1, ComlexNumber Factor2) {
+        ComlexNumber tmp;
+        tmp.x = Factor1.x * Factor2.x - Factor1.y * Factor2.y;
+        tmp.y = Factor1.x * Factor2.y + Factor1.y * Factor2.x;
+        cout << "z1*z2=";
+        tmp.ShowComlexNumber();
+    }
+
+    static void Division(ComlexNumber Dividend, ComlexNumber Devider) {
+        double x1 = Dividend.x;
+        double x2 = Devider.x;
+        double y1 = Dividend.y;
+        double y2 = Devider.y;
+        ComlexNumber tmp;
+        tmp.x = (x1 * x2 + y1 * y2) / (x2 * x2 + y2 * y2);
+        tmp.y = (x2 * y1 - x1 * y2) / (x2 * x2 + y2 * y2);
+        cout << "z1/z2=";
+        tmp.ShowComlexNumber();
+    }
+
+private:
+    double x = 0;
+    double y = 0;
+};
+
+int main()
+{
+    setlocale(LC_ALL, "Russian");
+
+    cout << "Вводим первое комплексное число z1.\n";
+    cout << "Введите действительную часть числа: ";
+    double x = GetNumber();
+    cout << "Введите мнимую часть числа: ";
+    double y = GetNumber();
+    ComlexNumber Number1;
+    Number1.Setxy(x, y);
+
+    cout << "Вводим второе комплексное число z2.\n";
+    cout << "Введите действительную часть числа: ";
+    x = GetNumber();
+    cout << "Введите мнимую часть числа: ";
+    y = GetNumber();
+    ComlexNumber Number2;
+    Number2.Setxy(x, y);
+
+    cout << "Ваши числа:\nz1=";
+    Number1.ShowComlexNumber();
+    cout << "z2=";
+    Number2.ShowComlexNumber();
+
+    ComlexNumber::Summa(Number1, Number2);
+    ComlexNumber::Difference(Number1, Number2);
+    ComlexNumber::Multiplication(Number1, Number2);
+    ComlexNumber::Division(Number1, Number2);
+    return 0;
+}
+
+double GetNumber()
+{
+    while (true)
+    {
+        double number = 0;
+        cin >> number;
+        if (cin.fail())
+        {
+            cout << "Ошибка: вы ввели не число\n";
+            cout << "Введите данные снова: ";
+            cin.clear();
+            cin.ignore(32767, '\n');
+        }
+        else {
+            cin.ignore(32767, '\n');
+            return number;
+        }
+    }
+}
