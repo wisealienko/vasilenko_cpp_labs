@@ -1,0 +1,357 @@
+//
+//  main.cpp
+//  vasilenko_cpp_lab_11
+//
+//  Created by Evgeny Wisealienko on 23.05.2021.
+//
+
+#include <iostream>
+#include <iomanip>
+#include <cstdlib>
+using namespace std;
+
+class SquareMatrix {
+public:
+    SquareMatrix(int transferredLength = 0) {
+        if (transferredLength == 0) {
+            this->sideLength = GetSideLength();
+        } else {
+            this->sideLength = transferredLength;
+        }
+        
+        this->matrixElements = new double* [this->sideLength];
+        for (int i = 0; i < this->sideLength; i++) {
+            this->matrixElements[i] = new double [this->sideLength];
+            for (int j = 0; j < this->sideLength; j++) {
+                this->matrixElements[i][j] = 0;
+            }
+        }
+    }
+
+    SquareMatrix(const SquareMatrix& matrix) {
+        this->sideLength = matrix.sideLength;
+
+        this->matrixElements = new double* [this->sideLength];
+        for (int i = 0; i < this->sideLength; i++) {
+            this->matrixElements[i] = new double[this->sideLength];
+            for (int j = 0; j < this->sideLength; j++) {
+                this->matrixElements[i][j] = matrix.matrixElements[i][j];
+            }
+        }
+    }
+
+    ~SquareMatrix() {
+        for (int i = 0; i < this->sideLength; i++) {
+             delete[] this->matrixElements[i];
+        }
+        delete[] this->matrixElements;
+    }
+
+    void ShowMatrix() {
+        for (int i = 0; i < this->sideLength; i++) {
+            if (this->sideLength == 1) {
+                cout << "( ";
+            } else {
+                if (i == 0) {
+                    cout << "/ ";
+                }
+                if (i == this->sideLength - 1) {
+                    cout << "\\ ";
+                }
+                if ((i != this->sideLength - 1) && (i != 0)) {
+                    cout << "| ";
+                }
+            }
+
+            for (int j = 0; j < this->sideLength; j++) {
+                cout << setw(6) << left << this->matrixElements[i][j] << " ";
+            }
+
+            if (this->sideLength == 1) {
+                cout << ") ";
+            } else {
+                if (i == 0) {
+                    cout << "\\";
+                }
+                if (i == this->sideLength - 1) {
+                    cout << "/ ";
+                }
+                if ((i != this->sideLength - 1) && (i != 0)) {
+                    cout << "| ";
+                }
+            }
+
+            cout << "\n";
+        }
+        cout << "\n";
+    }
+
+    void FillInTheMatrix() {
+        for (int i = 0; i < this->sideLength; i++) {
+            for (int j = 0; j < this->sideLength; j++) {
+                cout << "a" << i + 1 << j + 1 << " = ";
+                this->matrixElements[i][j] = GetDoubleNumber();
+            }
+        }
+        cout << "\n";
+    }
+
+    SquareMatrix operator= (const SquareMatrix& assignableMatrix) {
+        if (this->sideLength == assignableMatrix.sideLength) {
+            for (int i = 0; i < this->sideLength; i++) {
+                for (int j = 0; j < this->sideLength; j++) {
+                    this->matrixElements[i][j] = assignableMatrix.matrixElements[i][j];
+                }
+            }
+        } else {
+            cout << "Ошибка: нельзя присваивать матрицы разного размера.\n";
+            exit(1);
+        }
+        return *this;
+    }
+
+    SquareMatrix operator+ (SquareMatrix& assignableMatrix) {
+        SquareMatrix temp(this->sideLength);
+        if (this->sideLength == assignableMatrix.sideLength) {
+            for (int i = 0; i < this->sideLength; i++) {
+                for (int j = 0; j < this->sideLength; j++) {
+                    temp.matrixElements[i][j] = this->matrixElements[i][j] + assignableMatrix.matrixElements[i][j];
+                }
+            }
+            return temp;
+        }
+        else {
+            cout << "Ошибка: нельзя присваивать матрицы разного размера.\n";
+            exit(1);
+        }
+    }
+
+    SquareMatrix operator- (SquareMatrix& assignableMatrix) {
+        SquareMatrix temp(this->sideLength);
+        if (this->sideLength == assignableMatrix.sideLength) {
+            for (int i = 0; i < this->sideLength; i++) {
+                for (int j = 0; j < this->sideLength; j++) {
+                    temp.matrixElements[i][j] = this->matrixElements[i][j] - assignableMatrix.matrixElements[i][j];
+                }
+            }
+            return temp;
+        }
+        else {
+            cout << "Ошибка: нельзя вычитать матрицы ранзного размера.\n";
+            exit(1);
+        }
+    }
+
+    SquareMatrix operator* (SquareMatrix& assignableMatrix) {
+        SquareMatrix temp(this->sideLength);
+        if (this->sideLength == assignableMatrix.sideLength) {
+            for (int i = 0; i < this->sideLength; i++) {
+                for (int j = 0; j < this->sideLength; j++) {
+                    for (int currentPosition = 0; currentPosition < this->sideLength; currentPosition++) {
+                        temp.matrixElements[i][j] += this->matrixElements[i][currentPosition] *
+                            assignableMatrix.matrixElements[currentPosition][j];
+                    }
+                }
+            }
+            return temp;
+        } else {
+            cout << "Ошибка: нельзя умножать матрицы, если количество строк первой матрицы не равно количеству столбцов второй матрицы.\n";
+            exit(1);
+        }
+    }
+
+    SquareMatrix operator* (double scalar) {
+        SquareMatrix temp(this->sideLength);
+        for (int i = 0; i < this->sideLength; i++) {
+            for (int j = 0; j < this->sideLength; j++) {
+                temp.matrixElements[i][j] = this->matrixElements[i][j] * scalar;
+            }
+        }
+        return temp;
+    }
+
+    SquareMatrix operator^ (double degree) {
+        if (degree < 0) {
+            cout << "Ошибка: программа не может возводить в отрицательную степень.";
+            return *this;
+        }
+        
+        SquareMatrix result(this->sideLength);
+        for (int i = 0; i < result.sideLength; i++) {
+            for (int j = 0; j < result.sideLength; j++) {
+                if (i == j) {
+                    result.matrixElements[i][j] = 1;
+                }
+                else {
+                    result.matrixElements[i][j] = 0;
+                }
+            }
+        }
+        
+        if (degree > 0) {
+            for (int currentDegree = 1; currentDegree <= degree; currentDegree++) {
+                result = result * *this;
+            }
+        }
+        
+        return result;
+    }
+
+    SquareMatrix operator/ (double scalar) {
+        SquareMatrix temp(this->sideLength);
+        for (int i = 0; i < this->sideLength; i++) {
+            for (int j = 0; j < this->sideLength; j++) {
+                temp.matrixElements[i][j] = this->matrixElements[i][j] / scalar;
+            }
+        }
+        return temp;
+    }
+
+    friend SquareMatrix operator* (double scalar, SquareMatrix matrix);
+
+    static double GetDoubleNumber() {
+        double inputNumber;
+        bool dataIsNotNumber = true;
+        while (dataIsNotNumber) {
+            cin >> inputNumber;
+            dataIsNotNumber = cin.fail();
+            if (dataIsNotNumber) {
+                cout << "Ошибка: вы ввели не число\n";
+                cout << "Введите данные снова: ";
+                cin.clear();
+                cin.ignore(32767, '\n');
+            }
+            else {
+                cin.ignore(32767, '\n');
+            }
+        }
+        return inputNumber;
+    }
+
+protected:
+    int GetSideLength() {
+        cout << "Введите длину стороны (не больше восьми): ";
+        
+        int inputNumber = 0;
+        bool lenghtIsMoreThanEight = true;
+        while (lenghtIsMoreThanEight) {
+            bool numberIsNotNatural = true;
+            while (numberIsNotNatural) {
+                inputNumber = GetDoubleNumber();
+                numberIsNotNatural = (inputNumber <= 0);
+                if (numberIsNotNatural) {
+                    cout << "Ошибка: длина стороны должна быть натуральным числом.\n";
+                    cout << "Введите данные снова: ";
+                }
+            }
+            lenghtIsMoreThanEight = (inputNumber > 8);
+            if (lenghtIsMoreThanEight) {
+                cout << "Ошибка: длина стороны не должна быть больше, чем 8.\n";
+                cout << "Введите данные снова: ";
+            }
+        }
+        return inputNumber;
+    }
+
+    double** matrixElements = NULL;
+    int sideLength;
+};
+
+SquareMatrix operator* (double scalar, SquareMatrix matrix) {
+    SquareMatrix temp(matrix.sideLength);
+    for (int i = 0; i < matrix.sideLength; i++) {
+        for (int j = 0; j < matrix.sideLength; j++) {
+            temp.matrixElements[i][j] = matrix.matrixElements[i][j] * scalar;
+        }
+    }
+    return temp;
+}
+
+class MatrixExponent: public SquareMatrix {
+public:
+    MatrixExponent(int transferredLength = 0) :SquareMatrix(transferredLength) {};
+
+    MatrixExponent(const SquareMatrix& matrix) :SquareMatrix(matrix) {};
+
+    ~MatrixExponent() {};
+
+    MatrixExponent CalculateMatrixExponent() {
+        MatrixExponent result(this->sideLength);
+        for (int i = 0; i < border; i++) {
+            result = ((*this ^ i) / factorial(i)) + result;
+        }
+        return result;
+    }
+
+private:
+    static const int border = 20;
+    static long double factorial(int number) {
+        if (number == 0) {
+            return 1;
+        } else {
+            long long int res = 1;
+            for (int i = 1; i <= number; i++) {
+                res *= i;
+            }
+            return res;
+        }
+    }
+};
+
+int main()
+{;
+    setlocale(LC_ALL, "Russian");
+
+    cout << "Создаём квадратную матрицу A.\n";
+    SquareMatrix A;
+    A.FillInTheMatrix();
+    
+    cout << "Создаём квадратную матрицу B.\n";
+    SquareMatrix B;
+    B.FillInTheMatrix();
+
+    cout << "Матрица A:\n";
+    A.ShowMatrix();
+    cout << "Матрица B:\n";
+    B.ShowMatrix();
+
+    cout << "A + B:\n";
+    SquareMatrix AplusB = A + B;
+    AplusB.ShowMatrix();
+
+    cout << "A - B:\n";
+    SquareMatrix AminusB = A - B;
+    AminusB.ShowMatrix();
+
+    cout << "A * B:\n";
+    SquareMatrix AmultiplyB = A * B;
+    AmultiplyB = A * B;
+    AmultiplyB.ShowMatrix();
+
+    cout << "Пожалуйста, введите скаляр, на который будем умножать и делить матрицу А: ";
+    double scalar = SquareMatrix::GetDoubleNumber();
+
+    SquareMatrix AmultiplyScalar = A * scalar;
+    cout << "A * " << scalar << ":\n";
+    AmultiplyScalar.ShowMatrix();
+
+    AmultiplyScalar = scalar * A;
+    cout  << scalar << " * A:\n";
+    AmultiplyScalar.ShowMatrix();
+
+    SquareMatrix AdivideScalar = A / scalar;
+    cout << "A / " << scalar << ":\n";
+    AdivideScalar.ShowMatrix();
+
+    cout << "Создаём квадратную матрицу С.\n";
+    MatrixExponent C;
+    C.FillInTheMatrix();
+    cout << "Матрица С:\n";
+    C.ShowMatrix();
+
+    MatrixExponent expC = C.CalculateMatrixExponent();
+    cout << "exp(C):\n";
+    expC.ShowMatrix();
+
+    return 0;
+}
