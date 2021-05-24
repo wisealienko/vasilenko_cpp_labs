@@ -1,0 +1,256 @@
+//
+//  main.cpp
+//  vasilenko_cpp_lab_10
+//
+//  Created by Evgeny Wisealienko on 22.05.2021.
+//
+
+#include <iostream>
+#include <cmath>
+#define PI 3.14159265358979323846
+using namespace std;
+
+class ComlexNumberInTrigonometricForm;
+
+class ComlexNumberInAlgebraicForm {
+public:
+    ComlexNumberInAlgebraicForm(double Rez = 0, double Imz = 0) {
+        this->x = Rez;
+        this->y = Imz;
+    }
+
+    static double GetNumber() {
+        while (true) {
+            double number = 0;
+            cin >> number;
+            if (cin.fail()) {
+                cout << "Ошибка: вы ввели не число\n";
+                cout << "Введите данные снова: ";
+                cin.clear();
+                cin.ignore(32767, '\n');
+            } else {
+                cin.ignore(32767, '\n');
+                return number;
+            }
+        }
+    }
+
+    friend ostream& operator << (ostream& out, const ComlexNumberInAlgebraicForm& number);
+    void TranslationFromAlgebraicToTrigonometric(ComlexNumberInTrigonometricForm number);
+    friend void TranslationFromTrigonometricToAlgebraic(ComlexNumberInAlgebraicForm number);
+
+    ComlexNumberInAlgebraicForm operator= (ComlexNumberInAlgebraicForm number) {
+        this->x = number.x;
+        this->y = number.y;
+        return *this;
+    }
+
+    ComlexNumberInAlgebraicForm operator* (ComlexNumberInAlgebraicForm factor) {
+        double x1 = this->x, y1 = this->y, x2 = factor.x, y2 = factor.y;
+        double x = x1 * x2 - y1 * y2;
+        double y = x1 * y2 + x2 * y1;
+        ComlexNumberInAlgebraicForm tmp(x, y);
+        return tmp;
+    }
+
+    double Getx() {
+        return this->x;
+    }
+
+    double Gety() {
+        return this->y;
+    }
+        
+private:
+    double x = 0;
+    double y = 0;
+};
+
+ostream& operator << (ostream& out, const ComlexNumberInAlgebraicForm& number)
+{
+    double x = number.x;
+    double y = number.y;
+    if ((x != 0) && (y > 0) && (y != 1)) {
+        out << x << "+" << y << "i\n";
+    }
+    if ((x != 0) && (y == 1)) {
+        out << x << "+i\n";
+    }
+    if ((x != 0) && (y < 0) && (y != -1)) {
+        out << x << y << "i\n";
+    }
+    if ((x != 0) && (y == -1)) {
+        out << x << "-i\n";
+    }
+    if ((x != 0) && (y == 0)) {
+        out << x << "\n";
+    }
+    if ((x == 0) && (y == 0)) {
+        out << "0\n";
+    }
+    if ((x == 0) && (y == 1)) {
+        out << "i\n";
+    }
+    if ((x == 0) && (y == -1)) {
+        out << "-i\n";
+    }
+    if ((x == 0) && (y != 0) && (y != 1) && (y != -1)) {
+        out << y << "i\n";
+    }
+    return out;
+}
+
+class ComlexNumberInTrigonometricForm {
+public:
+    ComlexNumberInTrigonometricForm(double module = 0, double angle = 0) {
+        this->ro = module;
+        this->phiInDegrees = angle;
+    }
+
+    static double GetUngleInDegrees() {
+        double tempPhiInDegrees = ComlexNumberInTrigonometricForm::GetNumber();
+        if ((tempPhiInDegrees < 0) || (tempPhiInDegrees >= 360)) {
+            cout << "Предупреждение: программа автоматически пересчитала угол так, чтоюы он лежал на промежутке [0;360) .\n";
+            cout << "Значение синуса и косинуса от нового угла такое же, что и от прежнего.\n";
+            while (tempPhiInDegrees < 0) {
+                int fullTurnaround = 360;
+                tempPhiInDegrees += fullTurnaround;
+            }
+            while (tempPhiInDegrees >= 360) {
+                int fullTurnaround = 360;
+                tempPhiInDegrees -= fullTurnaround;
+            }
+        }
+        return tempPhiInDegrees;
+    }
+
+    static double GetModule() {
+        double tempModule;
+        do {
+            tempModule = ComlexNumberInTrigonometricForm::GetNumber();
+            if (tempModule < 0) {
+                cout << "Ошибка: модуль не может быть отрицательным.\n";
+                cout << "Введите данные снова: ";
+            }
+        } while (tempModule < 0);
+        return tempModule;
+    }
+
+    ComlexNumberInTrigonometricForm operator* (ComlexNumberInTrigonometricForm factor) {
+        double module1 = this->ro, angle1 = this->phiInDegrees, module2 = factor.ro, angle2 = factor.phiInDegrees;
+        double module = module1 * module2;
+        double angle = angle1 + angle2;
+        if (angle >= 360) {
+            int fullTurnaround = 360;
+            angle -= fullTurnaround;
+        }
+        ComlexNumberInTrigonometricForm tmp(module, angle);
+        return tmp;
+    }
+    
+    friend ostream& operator << (ostream& out, const ComlexNumberInTrigonometricForm& number);
+    friend void TranslationFromAlgebraicToTrigonometric(ComlexNumberInTrigonometricForm number);
+    void TranslationFromTrigonometricToAlgebraic(ComlexNumberInAlgebraicForm number);
+
+    ComlexNumberInTrigonometricForm operator= (ComlexNumberInTrigonometricForm number) {
+        this->ro = number.ro;
+        this->phiInDegrees = number.phiInDegrees;
+        return *this;
+    }
+
+    double GetPhiInDegrees() {
+        return this->phiInDegrees;
+    }
+
+    double GetRo() {
+        return this->ro;
+    }
+
+private:
+    double ro;
+    double phiInDegrees;
+    static double GetNumber() {
+        while (true)
+        {
+            double number = 0;
+            cin >> number;
+            if (cin.fail())
+            {
+                cout << "Ошибка: вы ввели не число\n";
+                cout << "Введите данные снова: ";
+                cin.clear();
+                cin.ignore(32767, '\n');
+            }
+            else {
+                cin.ignore(32767, '\n');
+                return number;
+            }
+        }
+    }
+};
+
+ostream& operator << (ostream& out, const ComlexNumberInTrigonometricForm& number) {
+    if (number.ro == 0) {
+        out << "0";
+    }
+    if (number.ro == 1) {
+        out << "(cos(" << number.phiInDegrees << ")+isin(" << number.phiInDegrees << "))\n";
+    }
+    if (number.ro == -1) {
+        out << "-(cos(" << number.phiInDegrees << ")+isin(" << number.phiInDegrees << "))\n";
+    }
+    if ((number.ro != -1) && (number.ro != 0) && (number.ro != 1)) {
+        out << number.ro << "(cos(" << number.phiInDegrees << ")+isin(" << number.phiInDegrees << "))\n";
+    }
+    return out;
+}
+
+int main()
+{
+    setlocale(LC_ALL, "Russian");
+    
+    cout << "Вводим первое комплексное число z1.\n";
+    cout << "Введите действительную часть числа: ";
+    double x = ComlexNumberInAlgebraicForm::GetNumber();
+    cout << "Введите мнимую часть числа: ";
+    double y = ComlexNumberInAlgebraicForm::GetNumber();
+    ComlexNumberInAlgebraicForm z1(x, y);
+
+    cout << "Вводим комплексное число z2 в тригонометрической форме.\n";
+    cout << "Введите угол числа (в градусах): ";
+    double ungle = ComlexNumberInTrigonometricForm::GetUngleInDegrees();
+    cout << "Введите модуль числа: ";
+    double module = ComlexNumberInTrigonometricForm::GetModule();
+    ComlexNumberInTrigonometricForm z2(module, ungle);
+
+    cout << "z1=" << z1;
+    cout << "z2=" << z2;
+    
+    ComlexNumberInAlgebraicForm productz1z1 = z1 * z1;
+    cout << "z1*z1=" << productz1z1;
+
+    ComlexNumberInAlgebraicForm z3;
+    z3.TranslationFromAlgebraicToTrigonometric(z2);
+    cout << "z1*z2=" << z1 * z3;
+
+    ComlexNumberInTrigonometricForm z4;
+    z4.TranslationFromTrigonometricToAlgebraic(z1);
+    cout << "z2*z1=" << z2 * z4;
+
+    ComlexNumberInTrigonometricForm productz2z2 = z2 * z2;
+    cout << "z2*z2=" << productz2z2;
+
+    return 0;
+}
+
+void ComlexNumberInAlgebraicForm::TranslationFromAlgebraicToTrigonometric(ComlexNumberInTrigonometricForm number) {
+    x = number.GetRo() * cos(number.GetPhiInDegrees() / 180 * PI);
+    y = number.GetRo() * sin(number.GetPhiInDegrees() / 180 * PI);
+}
+
+void ComlexNumberInTrigonometricForm::TranslationFromTrigonometricToAlgebraic(ComlexNumberInAlgebraicForm number) {
+    double x = number.Getx();
+    double y = number.Gety();
+    ro = sqrt(x * x + y * y);
+    phiInDegrees = asin(y / ro) * 180.0 / PI;
+}
