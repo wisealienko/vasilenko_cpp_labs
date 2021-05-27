@@ -1,0 +1,234 @@
+//
+//  main.cpp
+//  vasilenko_cpp_lab_12
+//
+//  Created by Evgeny Wisealienko on 26.05.2021.
+//
+
+#include <iostream>
+#include <math.h>
+using namespace std;
+
+double GetDoubleNumber();
+long double factorial(int number);
+template <class Common> Common CulculateCos(Common arg);
+
+class ComlexNumber {
+public:
+    ComlexNumber(double Rez = 0, double Imz = 0) {
+        this->x = Rez;
+        this->y = Imz;
+    }
+
+    static double GetDoubleNumber() {
+        while (true) {
+            double number = 0;
+            cin >> number;
+            if (cin.fail()) {
+                cout << "Ошибка: вы ввели не число\n";
+                cout << "Введите данные снова: ";
+                cin.clear();
+                cin.ignore(32767, '\n');
+            }
+            else {
+                cin.ignore(32767, '\n');
+                return number;
+            }
+        }
+    }
+
+    friend ostream& operator << (ostream& out, const ComlexNumber& number);
+
+    ComlexNumber operator= (ComlexNumber number) {
+        this->x = number.x;
+        this->y = number.y;
+        return *this;
+    }
+
+    ComlexNumber operator+ (ComlexNumber summand) {
+        double x1 = this->x, y1 = this->y, x2 = summand.x, y2 = summand.y;
+        double x = x1 + x2;
+        double y = y1 + y2;
+        ComlexNumber tmp(x, y);
+        return tmp;
+    }
+
+    ComlexNumber operator- (ComlexNumber subtrahend) {
+        double x1 = this->x, y1 = this->y, x2 = subtrahend.x, y2 = subtrahend.y;
+        double x = x1 - x2;
+        double y = y1 - y2;
+        ComlexNumber tmp(x, y);
+        return tmp;
+    }
+
+    ComlexNumber operator* (ComlexNumber multiplier) {
+        double x1 = this->x, y1 = this->y, x2 = multiplier.x, y2 = multiplier.y;
+        double x = x1 * x2 - y1 * y2;
+        double y = x1 * y2 + x2 * y1;
+        ComlexNumber tmp(x, y);
+        return tmp;
+    }
+
+    ComlexNumber operator/ (ComlexNumber divisor) {
+        double x1 = this->x, y1 = this->y, x2 = divisor.x, y2 = divisor.y;
+        double x = (x1 * x2 + y1 * y2) / (x2 * x2 + y2 * y2);
+        double y = (x2 * y1 - x1 * y2) / (x2 * x2 + y2 * y2);
+        ComlexNumber tmp(x, y);
+        return tmp;
+    }
+
+    ComlexNumber operator* (double number) {
+        double x1 = this->x, y1 = this->y;
+        double x = x1 * number;
+        double y = y1 * number;
+        ComlexNumber tmp(x, y);
+        return tmp;
+    }
+
+    friend ComlexNumber operator* (double realNumber, ComlexNumber comlexNumber);
+
+    ComlexNumber operator/ (double number) {
+        double x1 = this->x, y1 = this->y;
+        double x = x1 / number;
+        double y = y1 / number;
+        ComlexNumber tmp(x, y);
+        return tmp;
+    }
+
+    friend ComlexNumber operator/ (double dividendRealNumber, ComlexNumber divisorComlexNumber);
+
+    friend ComlexNumber pow(ComlexNumber number, double degree);
+
+private:
+    double x = 0;
+    double y = 0;
+};
+
+ComlexNumber operator* (double realNumber, ComlexNumber comlexNumber) {
+    double x1 = comlexNumber.x, y1 = comlexNumber.y;
+    double x = x1 * realNumber;
+    double y = y1 * realNumber;
+    ComlexNumber tmp(x, y);
+    return tmp;
+}
+
+ComlexNumber operator/ (double dividendRealNumber, ComlexNumber divisorComlexNumber) {
+    double x2 = divisorComlexNumber.x, y2 = divisorComlexNumber.y, x1 = dividendRealNumber;
+    double x = (x1 * x2) / (x2 * x2 * y2 * y2);
+    double y = -(x1 * y2) / (x2 * x2 + y2 * y2);
+    ComlexNumber tmp(x, y);
+    return tmp;
+}
+
+ostream& operator << (ostream& out, const ComlexNumber& number)
+{
+    double x = number.x;
+    double y = number.y;
+    if ((x != 0) && (y > 0) && (y != 1)) {
+        out << x << "+" << y << "i";
+    }
+    if ((x != 0) && (y == 1)) {
+        out << x << "+i";
+    }
+    if ((x != 0) && (y < 0) && (y != -1)) {
+        out << x << y << "i";
+    }
+    if ((x != 0) && (y == -1)) {
+        out << x << "-i";
+    }
+    if ((x != 0) && (y == 0)) {
+        out << x;
+    }
+    if ((x == 0) && (y == 0)) {
+        out << "0";
+    }
+    if ((x == 0) && (y == 1)) {
+        out << "i";
+    }
+    if ((x == 0) && (y == -1)) {
+        out << "-i";
+    }
+    if ((x == 0) && (y != 0) && (y != 1) && (y != -1)) {
+        out << y << "i";
+    }
+    return out;
+}
+
+ComlexNumber pow(ComlexNumber number, double degree) {
+    if (degree < 0) {
+        cout << "Ошибка: данная программа не может возводить комплексные числа в отрицательную степень.\n";
+        return number;
+    }
+    else {
+        ComlexNumber result(1, 0);
+        if (degree > 0) {
+            for (int i = 1; i <= degree; i++) {
+                result = result * number;
+            }
+        }
+        return result;
+    }
+}
+
+int main()
+{
+    setlocale(LC_ALL, "Russian");
+
+    cout << "Вводим комплексное число z - аргумент для косинуса.\n";
+    cout << "Введите действительную часть числа: ";
+    double x = ComlexNumber::GetDoubleNumber();
+    cout << "Введите мнимую часть числа: ";
+    double y = ComlexNumber::GetDoubleNumber();
+    ComlexNumber z(x, y);
+
+    cout << "z=" << z << "\n";
+
+    cout << "Введите действительный аргумент для косинуса (в радианах): ";
+    double realArg = GetDoubleNumber();
+
+    ComlexNumber cosz = CulculateCos(z);
+    double cos = CulculateCos(realArg);
+
+    cout << "cos(" << realArg << ")=" << cos << "\n";
+    cout << "cos(" << z << ")=" << cosz << "\n";
+    return 0;
+}
+
+double GetDoubleNumber() {
+    while (true) {
+        double number = 0;
+        cin >> number;
+        if (cin.fail()) {
+            cout << "Ошибка: вы ввели не число\n";
+            cout << "Введите данные снова: ";
+            cin.clear();
+            cin.ignore(32767, '\n');
+        }
+        else {
+            cin.ignore(32767, '\n');
+            return number;
+        }
+    }
+}
+
+long double factorial(int number) {
+    if (number == 0) {
+        return 1;
+    }
+    else {
+        long long int res = 1;
+        for (int i = 1; i <= number; i++) {
+            res *= i;
+        }
+        return res;
+    }
+}
+
+template <class Common> Common CulculateCos(Common arg) {
+    Common result = 0;
+    int border = 10;
+    for (int n = 0; n < 10; n++) {
+        result = result + (pow((-1), n) * pow(arg, 2 * n)) / (factorial(2 * n));
+    }
+    return result;
+}
